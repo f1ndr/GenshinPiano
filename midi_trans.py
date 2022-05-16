@@ -70,11 +70,13 @@ import pygame.midi
 
 def print_device_info():
     pygame.midi.init()
-    _print_device_info()
+    num = _print_device_info()
     pygame.midi.quit()
+    return num
 
 def _print_device_info():
-    for i in range(pygame.midi.get_count()):
+    num = pygame.midi.get_count()
+    for i in range(num):
         r = pygame.midi.get_device_info(i)
         (interf, name, input, output, opened) = r
 
@@ -88,6 +90,7 @@ def _print_device_info():
             "idx%2i: interface :%s:, name :%s:, opened :%s:  %s"
             % (i, interf, name, opened, in_out)
         )
+    return num
 
 
 def input_main(device_id=None):
@@ -113,9 +116,19 @@ def input_main(device_id=None):
         if i.poll():
             me = i.read(1)
             if me[0][0][0] == 144:
-                key_press(dic1[me[0][0][1]])
+                t = dic1.get(me[0][0][1])
+                if t:
+                    key_press(t)
 
-print_device_info()
+num = print_device_info()
 print()
 print("Please input the index of your device")
-input_main(int(input()))
+try:
+    n = int(input())
+except:
+    print('Wrong input, please input number.')
+
+if n >= 0 and n < num:
+    input_main(n)
+else:
+    print("Please input number from 0 to " + str(n-1))

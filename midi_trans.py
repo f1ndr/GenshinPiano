@@ -51,7 +51,7 @@ def key_up(scancode):
 
 def key_press(scancode, press_time = 0.2):
     key_down( scancode )
-    time.sleep( press_time )
+    #time.sleep( press_time )
     key_up( scancode )
 
 

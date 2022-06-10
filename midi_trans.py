@@ -1,5 +1,4 @@
 import pywinio
-import time
 import atexit
 import pygame
 import pygame.midi
@@ -58,9 +57,8 @@ def key_up(scancode):
     winio.set_port_byte(KBC_KEY_DATA, scancode | 0x80)
 
 
-def key_press(scancode, press_time=0.2):
+def key_press(scancode):
     key_down(scancode)
-    time.sleep(press_time)
     key_up(scancode)
 
 

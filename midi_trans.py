@@ -3,18 +3,13 @@ import atexit
 import pygame
 import pygame.midi
 
-# KeyBoard Commands
-# Command port
 KBC_KEY_CMD = 0x64
-# Data port
 KBC_KEY_DATA = 0x60
-
 g_winio = None
 
 
 def get_winio():
     global g_winio
-
     if g_winio is None:
         g_winio = pywinio.WinIO()
 
@@ -23,17 +18,11 @@ def get_winio():
             g_winio = None
 
         atexit.register(__clear_winio)
-
     return g_winio
 
 
 def wait_for_buffer_empty():
-    """
-    Wait keyboard buffer empty
-    """
-
     winio = get_winio()
-
     dw_reg_val = 0x02
     while dw_reg_val & 0x02:
         dw_reg_val = winio.get_port_byte(KBC_KEY_CMD)
@@ -41,7 +30,6 @@ def wait_for_buffer_empty():
 
 def key_down(scancode):
     winio = get_winio()
-
     wait_for_buffer_empty()
     winio.set_port_byte(KBC_KEY_CMD, 0xd2)
     wait_for_buffer_empty()
@@ -50,7 +38,6 @@ def key_down(scancode):
 
 def key_up(scancode):
     winio = get_winio()
-
     wait_for_buffer_empty()
     winio.set_port_byte(KBC_KEY_CMD, 0xd2)
     wait_for_buffer_empty()
@@ -82,13 +69,11 @@ def _print_device_info():
     for i in range(pygame.midi.get_count()):
         r = pygame.midi.get_device_info(i)
         (interf, name, device_input, device_output, opened) = r
-
         in_out = ""
         if device_input:
             in_out = "(input)"
         if device_output:
             in_out = "(output)"
-
         print(
             "idx%2i: interface: %s, name: %s, opened: %s # %s"
             % (i, interf, name, opened, in_out)
@@ -97,30 +82,21 @@ def _print_device_info():
 
 def input_main(device_id=None):
     pygame.init()
-    """
-    event_get = pygame.event.get
-    event_post = pygame.event.post
-    """
-
     pygame.midi.init()
-
-    _print_device_info()
-
     if device_id is None:
         input_id = pygame.midi.get_default_input_id()
     else:
         input_id = device_id
-
     print("using input_id: %s" % input_id)
     i = pygame.midi.Input(input_id)
-
-    pygame.display.set_mode((1, 1))
-
     while True:
         if i.poll():
             me = i.read(1)
             if me[0][0][0] == 144:
-                key_press(dic[me[0][0][1]])
+                try:
+                    key_press(dic[me[0][0][1]])
+                except KeyError:
+                    continue
 
 
 if __name__ == '__main__':
@@ -132,3 +108,5 @@ if __name__ == '__main__':
         print("Input an invalid device id")
     except pygame.midi.MidiException:
         print("Select device is not a valid input device")
+    except KeyboardInterrupt:
+        pygame.midi.quit()
